@@ -1,0 +1,11 @@
+version: '3.8'  # Указывается версия Docker Compose
+
+services:
+  prize-notifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/prize-notifier
+    ports:
+      - "2444:2444"

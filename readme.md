@@ -1,0 +1,1 @@
+Service for tracking the status of New Year prizes dobrycola-promo.ru
