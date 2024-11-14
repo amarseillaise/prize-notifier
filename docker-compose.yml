@@ -9,3 +9,4 @@ services:
       - .:/prize-notifier
     ports:
       - "2444:2444"
+    restart: unless-stopped
