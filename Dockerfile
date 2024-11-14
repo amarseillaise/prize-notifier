@@ -11,8 +11,8 @@ COPY ./init_service.py ./prize-notifier
 COPY ./start_api.py ./prize-notifier
 COPY ./start_bot.py ./prize-notifier
 COPY ./requirements.txt ./prize-notifier
+COPY ./start.sh ./prize-notifier
 
 RUN pip install --no-cache-dir --upgrade -r ./prize-notifier/requirements.txt
 
-CMD ["/prize-notifier/start.sh"]
-
+CMD ["./start.sh"]
