@@ -11,7 +11,7 @@ class PrizeModel(BaseModel):
     totalLimit: bool
 
     def is_available(self) -> bool:
-        return self.active and not self.totalLimit
+        return not self.totalLimit
 
 class TokenModel(BaseModel):
     access_token: str
