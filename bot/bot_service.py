@@ -1,12 +1,12 @@
 import schedule
 import time
-import requests
 import json
 import os
 from threading import Thread
 
-from http_service import DobryHttpService
 from telebot import TeleBot, types, apihelper
+
+from bot.http_service import DobryHttpService
 from app.models import PrizeModel
 
 current_thread = ...
