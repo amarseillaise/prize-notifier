@@ -3,7 +3,7 @@ import os
 
 
 from init_service import init_env_vars
-from bot.service_bot import DobryPizeBotService
+from bot.bot_service import DobryPizeBotService
 
 init_env_vars('bot.env')
 current_thread = ...
