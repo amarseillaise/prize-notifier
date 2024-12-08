@@ -3,9 +3,9 @@ import time
 import requests
 import json
 import os
-from dataclasses import dataclass
 from threading import Thread
 
+from http_service import DobryHttpService
 from telebot import TeleBot, types, apihelper
 from app.models import PrizeModel
 
@@ -17,7 +17,7 @@ class DobryPizeBotService:
         self.polling_site_enabled = False
         self.all_prize_list = []
         self.wished_prizes = []
-        self.url = self.Url()
+        self.http_service = DobryHttpService()
 
     def init_commands(self, bot: TeleBot):
         commands = [
@@ -48,10 +48,7 @@ class DobryPizeBotService:
         bot.send_message(chat_message.chat.id, 'Изменение статуса призов больше не отслеживается')
 
     def send_prizes_list(self, bot: TeleBot, chat_message: types.Message):
-        http_method = 'prizes/'
-        url = f'{self.url.get_url()}/{http_method}'
-        response = requests.get(url)
-        prizes = [PrizeModel(**item) for item in json.loads(response.content)]
+        prizes = self.http_service.get_prizes_list()
         message = self._get_all_prizes_formated(prizes)
         bot.send_message(chat_message.chat.id, message)
 
@@ -62,12 +59,8 @@ class DobryPizeBotService:
         bot.send_message(chat_message.chat.id, message)
 
     def add_prize_to_wishlist(self, bot: TeleBot, chat_message: types.Message):
-        http_method = 'prizes/'
-        url = f'{self.url.get_url()}/{http_method}'
-        response = requests.get(url)
-        prizes = [PrizeModel(**item) for item in json.loads(response.content)]
-        self.all_prize_list = prizes
-        message = self._get_all_prizes_formated_by_id_to_add(prizes)
+        self.all_prize_list = self.http_service.get_prizes_list()
+        message = self._get_all_prizes_formated_by_id_to_add(self.all_prize_list)
         bot.send_message(chat_message.chat.id, message)
         bot.register_next_step_handler(chat_message, self._handle_add_to_wishlist, bot=bot)
 
@@ -83,12 +76,10 @@ class DobryPizeBotService:
         return self._has_subscribers() and self._has_wishlist() and not self.polling_site_enabled
 
     def _check_prizes_available(self, bot: TeleBot):
-        http_method = 'prizes/'
-        url = f'{self.url.get_url()}/{http_method}'
-        response = requests.get(url)
-        all_prizes = [PrizeModel(**item) for item in json.loads(response.content)]
+        all_prizes = self.http_service.get_prizes_list()
         wished_prizes = self._get_wishlist()
-        available_prizes = [prize for prize in all_prizes if prize.is_available() and str(prize.id) in wished_prizes]
+        available_prizes = [prize for prize in all_prizes
+                            if prize.is_available() and str(prize.id) in wished_prizes]
         if available_prizes:
             message = self._get_available_prizes_formated(available_prizes)
             self._send_message_to_subscribers(message, bot)
@@ -218,13 +209,3 @@ class DobryPizeBotService:
         text = 'Срочно! Срочно! Срочно! Доступны для заказа следующие призы:\n\n'
         site = '\n\nhttps://dobrycola-promo.ru/profile'
         return text + '\n'.join([item.name for item in prizes]) + site
-
-    @dataclass
-    class Url:
-        protocol = 'http'
-        domain = '127.0.0.1'
-        port = '2444'
-        api = 'api'
-
-        def get_url(self) -> str:
-            return f'{self.protocol}://{self.domain}:{self.port}/{self.api}'
