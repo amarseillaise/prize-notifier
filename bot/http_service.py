@@ -29,7 +29,7 @@ class DobryHttpService:
         return response
 
     def _make_request(self, method, **kwargs) -> requests.Response | None:
-        response = self._try_request(method(**kwargs))
+        response = self._try_request(method, **kwargs)
         if response and response.status_code != 200:
             return None
         return response
